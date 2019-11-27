@@ -2,8 +2,8 @@ const WorkerMock = require('./workerMock')
 const cpuNum = require('os').cpus().length
 class WorkerPool {
   constructor() {
-    this.maxWorkers = 2
-    this.minWorkers = 1
+    this.maxWorkers = cpuNum * 2
+    this.minWorkers = cpuNum
     this.maxTaskQueueSize = 150
     // 工作线程队列
     this.workers = []
