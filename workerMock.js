@@ -4,6 +4,7 @@ class WorkerMock {
     this.worker = new Worker(path, { workerData })
     this.resolve = null
     this.reject = console.error
+    this.terminated = false
     this.worker.on('message', msg => {
       console.log('work done:', msg, Date.now())
       this.resolve(msg)
@@ -24,6 +25,7 @@ class WorkerMock {
       this.reject(new Error('线程终止'))
     }
     this.resolve = this.reject = null
+    this.terminated = true
   }
   postMessage(task) {
     this.resolve = task.resolve

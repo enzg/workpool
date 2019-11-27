@@ -10,18 +10,43 @@ const delay = async (ms) => {
   })
 }
 const run = async () => {
-  for (let i = 0; i < 100; i++) {
-    pool.addTask({
-      taskId: i,
-      resolve: 'pending',
-      reject: null,
-      data: {
-        name: `task_${i}`,
+  for (let i = 0, j = 0; i < 100; i = i + 2, j = i + 3) {
+    pool.addTask([
+      {
         taskId: i,
-        timestamp: Date.now()
+        resolve: 'pending',
+        reject: null,
+        data: {
+          name: `task_${i}`,
+          taskId: i,
+          timestamp: Date.now()
+        }
+      },
+      {
+        taskId: i + 1,
+        resolve: 'pending',
+        reject: null,
+        data: {
+          name: `task_${i + 1}`,
+          taskId: i + 1,
+          timestamp: Date.now()
+        }
       }
-    })
+    ])
     await delay(1000)
+    pool.addTask(
+      {
+        taskId: j,
+        resolve: 'pending',
+        reject: null,
+        data: {
+          name: `task_${j}`,
+          taskId: j,
+          timestamp: Date.now()
+        }
+      }
+
+    )
   }
 
 }
