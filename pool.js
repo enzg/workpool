@@ -2,8 +2,8 @@ const WorkerMock = require('./workerMock')
 const cpuNum = require('os').cpus().length
 class WorkerPool {
   constructor() {
-    this.maxWorkers = cpuNum * 2
-    this.minWorkers = cpuNum
+    this.maxWorkers = 2
+    this.minWorkers = 1
     this.maxTaskQueueSize = 150
     // 工作线程队列
     this.workers = []
@@ -38,7 +38,7 @@ class WorkerPool {
   // taskId 会被用来跟踪任务。 其中一种场景是：
   // 一个计算任务被分解为n个task。最终必须等待n个task全部完成才能结束
   _dispatchTask(worker, task) {
-    return worker.exec(task)
+    const promise = worker.exec(task)
       .then(this._nextTask)
       .catch(err => {
         if (worker.terminated) {
@@ -47,6 +47,8 @@ class WorkerPool {
         }
         this._nextTask()
       })
+    console.log('in dispatch task:', worker.busy())
+    return promise
   }
   _nextTask() {
     if (this.tasks.length > 0) {
@@ -77,6 +79,7 @@ class WorkerPool {
           if (task.resolve === 'pending') {
             // 干活
             this._dispatchTask(worker, task)
+            console.log(worker.busy())
           } else {
             this._nextTask()
           }
@@ -90,9 +93,11 @@ class WorkerPool {
   _getWorker() {
     for (let worker of this.workers) {
       if (!worker.busy()) {
+        console.log('found idle!')
         return worker
       }
     }
+    console.log('no idle try create')
     if (this.workers.length < this.maxWorkers) {
       let freshWorker = this._createWorker()
       this.workers.push(freshWorker)

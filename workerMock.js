@@ -5,8 +5,8 @@ class WorkerMock {
     this.resolve = null
     this.reject = console.error
     this.terminated = false
+    this.idle = true
     this.worker.on('message', msg => {
-      console.log('work done:', msg, Date.now())
       this.resolve(msg)
     })
     this.worker.on('error', err => {
@@ -14,10 +14,11 @@ class WorkerMock {
     })
     this.worker.on('exit', err => {
       this.reject(err)
+      this.resolve = null
     })
   }
   busy() {
-    return !this.resolve
+    return !this.idle
   }
   terminate() {
     this.worker.terminate()
@@ -33,10 +34,14 @@ class WorkerMock {
     this.worker.postMessage(task.data)
   }
   exec(task) {
+    this.idle = false
     return new Promise((resolve, reject) => {
       task.resolve = resolve
       task.reject = reject
       this.postMessage(task)
+    }).then(msg => {
+      console.log('work done:', msg, Date.now())
+      this.idle = true
     })
   }
 }
