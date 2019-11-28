@@ -14,7 +14,6 @@ class WorkerMock {
     })
     this.worker.on('exit', err => {
       this.reject(err)
-      this.resolve = null
     })
   }
   busy() {
@@ -39,9 +38,6 @@ class WorkerMock {
       task.resolve = resolve
       task.reject = reject
       this.postMessage(task)
-    }).then(msg => {
-      console.log('work done:', msg, Date.now())
-      this.idle = true
     })
   }
 }
