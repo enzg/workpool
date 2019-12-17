@@ -29,7 +29,7 @@ class WorkerPool {
     //终止所有任务。
     terminate() {
         for (let task of this.tasks) {
-            task.promise.reject(new Error('线程池关闭了'))
+            task.reject && task.reject(new Error('线程池关闭了'))
         }
         this.tasks.length = 0
         for (let worker of this.workers) {
