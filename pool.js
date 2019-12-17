@@ -88,12 +88,12 @@ class WorkerPool {
               console.log(values)
               return values
             })
-          // .catch(err => {
-          //   if (worker.terminated) {
-          //     this._removeWorker(worker)
-          //     this._spawnWorkers()
-          //   }
-          // })
+          .catch(err => {
+            if (worker.terminated) {
+              this._removeWorker(worker)
+              this._spawnWorkers()
+            }
+          })
         } else {
           if (task.resolve === 'pending') {
             // 干活
