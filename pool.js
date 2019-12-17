@@ -50,13 +50,13 @@ class WorkerPool {
         console.log('worker 执行完了:', ret, Date.now())
         return ret
       })
-      // .catch(err => {
-      //   console.error(err)
-      //   if (worker.terminated) {
-      //     this._removeWorker(worker)
-      //     this._spawnWorkers()
-      //   }
-      // })
+      .catch(err => {
+        console.error('dispatch error:',err)
+        if (worker.terminated) {
+          this._removeWorker(worker)
+          this._spawnWorkers()
+        }
+      })
       .finally(
         () => {
           worker.idle = true
