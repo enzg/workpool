@@ -27,17 +27,15 @@ class WorkerMock {
     this.resolve = this.reject = null
     this.terminated = true
   }
-  postMessage(task) {
-    this.resolve = task.resolve
-    this.reject = task.reject
+  postMessage(task,resolve,reject) {
+    this.resolve = resolve
+    this.reject = reject
     this.worker.postMessage(task.data)
   }
   exec(task) {
     this.idle = false
     return new Promise((resolve, reject) => {
-      task.resolve = resolve
-      task.reject = reject
-      this.postMessage(task)
+      this.postMessage(task,resolve,reject)
     })
   }
 }

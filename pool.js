@@ -28,18 +28,13 @@ class WorkerPool {
     }
     //终止所有任务。
     terminate() {
-        for (let task of this.tasks) {
-            task.reject && task.reject(new Error('线程池关闭了'))
-        }
         this.tasks.length = 0
         for (let worker of this.workers) {
             worker.terminate()
         }
     }
     // 从任务队列中取任务。 然后找从工作线程队列中找一个空闲的线程。把任务分配给它
-    // task = {taskId,resolve,reject,data}
-    // 当任务被创建时 resolve == ‘pending’ reject == null
-    // 当任务被分配给 worker时 resolve == fn reject == fn
+    // task = {taskId,data}
     // taskId 会被用来跟踪任务。 其中一种场景是：
     // 一个计算任务被分解为n个task。最终必须等待n个task全部完成才能结束
     _dispatchTask(worker, task) {
@@ -56,6 +51,7 @@ class WorkerPool {
                     this._removeWorker(worker)
                     this._spawnWorkers()
                 }
+                // 把任务重新加回队列
             })
             .finally(() => {
                 worker.idle = true
@@ -76,10 +72,8 @@ class WorkerPool {
                 if (Array.isArray(task)) {
                     const groupPromises = []
                     for (let part of task) {
-                        if (part.resolve === 'pending') {
-                            // 组装全部的子任务
-                            groupPromises.push(this._dispatchTask(worker, part))
-                        }
+                        // 组装全部的子任务
+                        groupPromises.push(this._dispatchTask(worker, part))
                     }
                     Promise.all(groupPromises)
                         .then(function(values) {
@@ -93,12 +87,8 @@ class WorkerPool {
                             }
                         })
                 } else {
-                    if (task.resolve === 'pending') {
-                        // 干活
-                        this._dispatchTask(worker, task)
-                    } else {
-                        this._nextTask()
-                    }
+                    // 干活
+                    this._dispatchTask(worker, task)
                 }
             } else {
                 // console.error('no workers')
